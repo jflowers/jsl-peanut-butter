@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  namespace: default
+  labels:
+    worker: pipeline-build-pod
+spec:
+  serviceAccountName: jenkins
+  containers:
+  - name: gradle
+    image: gradle:jre8
+    command:
+    - cat
+    tty: true

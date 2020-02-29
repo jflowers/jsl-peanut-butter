@@ -1,0 +1,134 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        //classpath 'com.eriwen:gradle-cobertura-plugin:1.1.1'
+        classpath 'net.saliman:gradle-cobertura-plugin:2.6.0'
+    }
+}
+
+apply plugin: 'groovy'
+//apply plugin: 'cobertura'
+apply plugin: 'net.saliman.cobertura'
+
+repositories {
+    jcenter()
+    maven {
+        url "https://repo.jenkins-ci.org/releases/"
+    }
+}
+
+dependencies {
+    compile 'org.codehaus.groovy:groovy-all:2.4.14'
+
+    compile group: 'javax.servlet', name: 'javax.servlet-api', version: '4.0.1'
+
+    compile group: 'org.jenkins-ci.main', name: 'jenkins-core', version: '2.199'
+
+    compile 'org.jvnet.hudson.plugins:groovy-postbuild:2.5@jar'
+    compile 'org.jenkins-ci.plugins:mailer:1.29@jar'
+    compile 'org.jenkins-ci.plugins:slack:2.34@jar'
+    compile 'org.jenkins-ci.plugins:credentials:2.3.0@jar'
+
+    testCompile 'org.spockframework:spock-core:1.1-groovy-2.4'
+    testCompile 'cglib:cglib-nodep:3.2.5'
+    testRuntime 'org.slf4j:slf4j-api:1.7.10'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src']
+        }
+    }
+
+    test {
+        groovy {
+            srcDirs = ['test']
+        }
+    }
+}
+
+clean.doFirst {
+    delete "${rootDir}/out"
+}
+
+test {
+    afterSuite { desc, result ->
+        if (!desc.parent)
+            println("${result.resultType} " +
+                "(${result.testCount} tests, " +
+                "${result.successfulTestCount} successes, " +
+                "${result.failedTestCount} failures, " +
+                "${result.skippedTestCount} skipped)")
+    }
+}
+
+cobertura {
+    coverageFormats = ['xml', 'html']
+    //includes = ['src/**/*.groovy']
+}
+
+def coverageThresholdBranchrate = 80
+def coverageThresholdLinerate = 80
+
+def classSource = new File("${rootDir}/Cobertura.groovy").text
+
+def cobertura = new GroovyShell().evaluate("""${classSource}
+return new Cobertura()""")
+
+def thresholdsFile=project.file("coverage.thresholds.xml")
+def coverageReportDir="${rootDir}/build/reports/cobertura"
+def coverageReportFile = "${coverageReportDir}/coverage.xml"
+
+task coverageCheck() {
+    group 'coverage'
+    description 'Performs check on code coverage that minimums have been met.'
+    inputs.file coverageReportFile
+    outputs.file "${coverageReportDir}/cobertura.check.flag"
+}
+coverageCheck.doLast {
+    if (new File(coverageReportFile).exists()) {
+        def thresholds = null
+        if (thresholdsFile.exists())
+            thresholds = new XmlParser().parse(thresholdsFile)
+
+        def coverageParser = new XmlParser()
+        coverageParser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", false)
+        coverageParser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        def coverage = coverageParser.parse(coverageReportFile)
+
+
+        def shouldSave = cobertura.check(project.name, thresholds, coverage, coverageThresholdBranchrate, coverageThresholdLinerate)
+        if (shouldSave)
+            cobertura.writeXml thresholds, thresholdsFile
+        def flagFile = new File("${coverageReportDir}/cobertura.check.flag")
+        if (flagFile.exists()){
+            flagFile.delete()
+        }
+        flagFile.createNewFile()
+    }
+}
+
+task coverageBless() {
+    group 'coverage'
+    description "Updated the code coverage minimums to match current code coverage rates."
+}
+coverageBless.doLast {
+    if (new File(coverageReportFile).exists()) {
+        // create thresholds xml
+        def thresholds = new Node(null, "thresholds")
+        // extract failures into it
+        cobertura.extractCoverageFailures coverageReportFile, coverageThresholdBranchrate, coverageThresholdLinerate, {
+            className, branchcount, branchesexecuted, branchrate, linecount, linesexecuted, linerate ->
+            thresholds.appendNode("threshold", ['class':className, 'branchcount':branchcount,
+                        'branchsexecuted':branchesexecuted, 'branchrate':branchrate,
+                        'linecount':linecount, 'linesexecuted':linesexecuted, 'linerate':linerate])
+        }
+        // if we got any, write the file
+        if (thresholds.children().size() > 0)
+            cobertura.writeXml thresholds, thresholdsFile
+    }
+}
+

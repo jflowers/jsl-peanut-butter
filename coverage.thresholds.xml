@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thresholds>
+  <threshold class="com.peanutbutter.jenkins.ErrorSummary$_generate_closure1" branchcount="6" branchsexecuted="4" branchrate="0.6666666666666666" linecount="1" linesexecuted="1" linerate="1.0"/>
+  <threshold class="com.peanutbutter.jenkins.ErrorSummary$_generate_closure2$_closure3" branchcount="30" branchsexecuted="12" branchrate="0.4" linecount="9" linesexecuted="6" linerate="0.6666666666666666"/>
+  <threshold class="com.peanutbutter.jenkins.Slack" branchcount="22" branchsexecuted="4" branchrate="0.18181818181818182" linecount="51" linesexecuted="13" linerate="0.2549019607843137"/>
+  <threshold class="com.peanutbutter.jenkins.Slack$_findSecret_closure2" branchcount="0" branchsexecuted="0" branchrate="1.0" linecount="1" linesexecuted="0" linerate="0.0"/>
+  <threshold class="com.peanutbutter.jenkins.Slack$_getCulpritEmailAddresses_closure4" branchcount="0" branchsexecuted="0" branchrate="1.0" linecount="1" linesexecuted="0" linerate="0.0"/>
+  <threshold class="com.peanutbutter.jenkins.Slack$_getCulpritEmailAddresses_closure4$_closure7" branchcount="4" branchsexecuted="0" branchrate="0.0" linecount="3" linesexecuted="0" linerate="0.0"/>
+  <threshold class="com.peanutbutter.jenkins.Slack$_getCulpritEmailAddresses_closure5" branchcount="4" branchsexecuted="0" branchrate="0.0" linecount="4" linesexecuted="0" linerate="0.0"/>
+  <threshold class="com.peanutbutter.jenkins.Slack$_slackIds_closure3" branchcount="2" branchsexecuted="1" branchrate="0.5" linecount="2" linesexecuted="2" linerate="1.0"/>
+  <threshold class="com.peanutbutter.jenkins.Version" branchcount="6" branchsexecuted="4" branchrate="0.6666666666666666" linecount="13" linesexecuted="11" linerate="0.8461538461538461"/>
+</thresholds>
