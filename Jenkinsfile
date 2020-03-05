@@ -50,13 +50,6 @@ pipeline{
     }
   }
 
-  environment{
-    DOCKER_CREDS = credentials('docker-hub')
-    DOCKER_AUTH = credentials('docker-auth')
-
-    SONAR_SCANNER = credentials('sonar-scanner')
-  }
-
   stages{
     stage('Checkout'){
       steps{
