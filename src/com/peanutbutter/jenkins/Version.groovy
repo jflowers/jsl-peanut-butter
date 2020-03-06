@@ -37,8 +37,11 @@ class Version implements Serializable {
     }
 
     _buildVersion = "${versionPrefix}.${gitVersion}"
-    if (this.script.env.BRANCH_NAME != 'master') {
-      _buildVersion = _buildVersion + "-${this.script.env.BRANCH_NAME}"
+
+
+    branchName = this.script.env.GIT_BRANCH.split('/')[1]
+    if (branchName != 'master') {
+      _buildVersion = _buildVersion + "-${branchName}"
     }
 
     return _buildVersion
